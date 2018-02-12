@@ -1120,6 +1120,28 @@ class Print(Operation):
             self.warn_line(line)
 
 
+class PrintFunction(Operation):
+    NAME = "print_function"
+    DOC = ('insert "from __future__ import print_function"')
+
+    def patch(self, content):
+        return self.patcher.add_import(content, 'from __future__ import print_function')
+
+    def check(self, content):
+        pass
+
+
+class AbsoluteImport(Operation):
+    NAME = "absolute_import"
+    DOC = ('insert "from __future__ import absolute_import"')
+
+    def patch(self, content):
+        return self.patcher.add_import(content, 'from __future__ import absolute_import')
+
+    def check(self, content):
+        pass
+
+
 class String(Operation):
     NAME = "string"
     DOC = 'replace string.func(str, ...) with text.func(...)'
@@ -1234,6 +1256,8 @@ OPERATIONS = (
     Dict0,
     DictAdd,
     Print,
+    PrintFunction,
+    AbsoluteImport,
     String,
     All,
 )
@@ -1265,6 +1289,8 @@ class Patcher:
         if All.NAME in operations:
             operations |= set(OPERATION_NAMES)
             operations.discard(All.NAME)
+            operations.discard(PrintFunction.NAME)
+            operations.discard(AbsoluteImport.NAME)
         discard = [operation for operation in operations
                    if operation.startswith('-')]
         for name in discard:
@@ -1302,6 +1328,12 @@ class Patcher:
                         self.warning("Path %s doesn't exist" % path)
                         self.exitcode = 1
 
+    def find_end_comment(self, cq, line, content, pos):
+        start = line.find(cq) + 2
+        if line.find(cq, start) < 0:
+            return content.find(cq, pos + start)
+        return -1
+
     def add_import_names(self, content, import_line, import_names):
         import_line = import_line.rstrip() + '\n'
 
@@ -1310,6 +1342,48 @@ class Patcher:
         import_groups = parse_import_groups(content)
         if not import_groups:
             if content:
+                SHARP = '#'
+                TDQ = '"""'
+                TSQ = "'''"
+                l = ''
+                start = 0
+                end = len(content)
+                pos = start
+
+                while pos < end:
+                    line = get_line(content, pos)
+                    l = line.strip()
+                    comment = l.startswith(SHARP)
+                    if l.startswith(TDQ):
+                        comment |= True
+                        start = self.find_end_comment(TDQ, line, content, pos)
+                        if start >= 0:
+                            pos = start
+                            line = get_line(content, start)
+                    elif l.startswith(TSQ):
+                        comment |= True
+                        start = self.find_end_comment(TSQ, line, content, pos)
+                        if start >= 0:
+                            pos = start
+                            line = get_line(content, start)
+
+                    if not comment:
+                        break
+
+                    pos += len(line)
+
+                if pos:
+                    prev_content  = content[:pos]
+                    content = content[pos:]
+
+                    if content:
+                        if l:
+                            return prev_content + import_line + '\n\n' + content
+                        else:
+                            return prev_content + import_line + '\n' + content
+                    else:
+                        return prev_content + import_line
+
                 return import_line + '\n\n' + content
             else:
                 return import_line
@@ -1342,12 +1416,16 @@ class Patcher:
                 if add_future and any(name == '__future__' for name in imports):
                     break
             else:
-                create_new_import_group = (end, True)
-                if not seen_stdlib_group:
-                    self.warning("%s: Failed to find the best place to add %r: "
-                                 "put it at the end. Use --app and "
-                                 "--third-party options."
-                                 % (self.current_file, import_line.rstrip()))
+                if add_future:
+                    # stdlib imports, add future imports before in a new group
+                    create_new_import_group = (start, False)
+                else:
+                    create_new_import_group = (end, True)
+                    if not seen_stdlib_group:
+                        self.warning("%s: Failed to find the best place to add %r: "
+                                     "put it at the end. Use --app and "
+                                     "--third-party options."
+                                     % (self.current_file, import_line.rstrip()))
 
         if create_new_import_group is not None:
             pos, last_group = create_new_import_group
