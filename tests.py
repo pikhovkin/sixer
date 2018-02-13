@@ -1857,6 +1857,183 @@ class TestOperations(unittest.TestCase):
 
         ''')
 
+    def test_insert_future_group(self):
+        self.check("absolute_import", '''
+            def func():
+                pass
+
+        ''', '''
+            from __future__ import absolute_import
+
+
+            def func():
+                pass
+
+        ''')
+
+        self.check("absolute_import", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            from __future__ import absolute_import
+
+
+            def func():
+                pass
+
+        ''')
+
+        self.check("absolute_import", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            from __future__ import absolute_import
+
+
+            def func():
+                pass
+
+        ''')
+
+        self.check("absolute_import", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            from __future__ import absolute_import
+
+
+            def func():
+                pass
+
+        ''')
+
+        self.check("absolute_import", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            import math
+
+
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            from __future__ import absolute_import
+
+            import math
+
+
+            def func():
+                pass
+
+        ''')
+
+        self.check("absolute_import", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            import math
+
+
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            from __future__ import absolute_import
+
+            import math
+
+
+            def func():
+                pass
+
+        ''')
+
+        self.check("absolute_import", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            import math
+
+            import random
+
+            import os
+
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            from __future__ import absolute_import
+
+            import math
+
+            import random
+
+            import os
+
+            def func():
+                pass
+
+        ''')
+
+        self.check("print_function", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            from __future__ import absolute_import
+
+            import math
+
+            import random
+
+            import os
+
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            from __future__ import absolute_import
+            from __future__ import print_function
+
+            import math
+
+            import random
+
+            import os
+
+            def func():
+                pass
+
+        ''')
+
 
 class TestProgram(unittest.TestCase):
     def run_sixer(self, scanned, *paths):

@@ -1387,7 +1387,10 @@ class Patcher:
                         if line.strip():
                             return prev_content + import_line + '\n\n' + content
                         else:
-                            return prev_content + import_line + '\n' + content
+                            if content.startswith('\n\n'):
+                                return prev_content + import_line + content
+                            else:
+                                return prev_content + import_line + '\n' + content
                     else:
                         return prev_content + import_line
 
@@ -1400,7 +1403,13 @@ class Patcher:
         if not add_future and import_groups[0][2] == {'__future__'}:
             # Ignore the first import group: from __future__ import ...
             del import_groups[0]
-        if len(import_groups) == 3:
+
+        if add_future:
+            import_group = import_groups[0]
+            if import_groups[0][2] != {'__future__'}:
+                start, end, imports = import_group
+                create_new_import_group = (start, False)
+        elif len(import_groups) == 3:
             import_group = import_groups[1]
         else:
             # Heuristic to locate the import group of third-party modules
