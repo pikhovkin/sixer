@@ -949,8 +949,8 @@ class TestOperations(unittest.TestCase):
             """, """
             # urllib2.open
             from six.moves import urllib
-            
-            
+
+
             urllib.request.urlopen(url)
             """,
            warnings=['Unknown urllib symbol: urllib2.open'])
@@ -963,7 +963,7 @@ class TestOperations(unittest.TestCase):
             urllib2.urlopen(url)
             """, """
             import random
-            
+
             from six.moves import urllib
 
 
@@ -1424,11 +1424,11 @@ class TestOperations(unittest.TestCase):
             \'\'\'
                 Comments
             \'\'\'
-            """ 
+            """
                 Comments """
             def func():
                 pass
-        
+
         ''', '''
             #!/usr/bin/env python3
             # coding: utf-8
@@ -1438,14 +1438,14 @@ class TestOperations(unittest.TestCase):
             \'\'\'
                 Comments
             \'\'\'
-            """ 
+            """
                 Comments """
             from __future__ import print_function
-        
-        
+
+
             def func():
                 pass
-        
+
         ''')
 
         self.check("print_function", '''
@@ -1559,6 +1559,39 @@ class TestOperations(unittest.TestCase):
             from __future__ import print_function
 
             from random import random
+
+        ''')
+
+        self.check("print_function", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            u\'\'\'
+            \'\'\'
+            u""""""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            u\'\'\'
+            \'\'\'
+            u""""""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            from __future__ import print_function
+
+
+            def func():
+                pass
 
         ''')
 
@@ -1744,7 +1777,7 @@ class TestOperations(unittest.TestCase):
 
 
             from __future__ import division
-            
+
             from random import random
 
         ''', '''
@@ -1788,6 +1821,39 @@ class TestOperations(unittest.TestCase):
             from __future__ import print_function
 
             from random import random
+
+        ''')
+
+        self.check("absolute_import", '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            u\'\'\'
+            \'\'\'
+            u""""""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            u\'\'\'
+            \'\'\'
+            u""""""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            from __future__ import absolute_import
+
+
+            def func():
+                pass
 
         ''')
 

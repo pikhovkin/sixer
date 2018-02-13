@@ -1329,10 +1329,21 @@ class Patcher:
                         self.exitcode = 1
 
     def find_end_comment(self, cq, line, content, pos):
-        start = line.find(cq) + 2
-        if line.find(cq, start) < 0:
-            return content.find(cq, pos + start)
+        cq_end = cq[1:] if cq.startswith('u') else cq
+        start = line.find(cq) + len(cq) - 1
+        if line.find(cq_end, start) < 0:
+            return content.find(cq_end, pos + start)
         return -1
+
+    def comment_handler(self, cq, comment, line, content, pos):
+        if line.lstrip().startswith(cq):
+            comment |= True
+            start = self.find_end_comment(cq, line, content, pos)
+            if start >= 0:
+                pos = start
+                line = get_line(content, start)
+
+        return comment, pos, line
 
     def add_import_names(self, content, import_line, import_names):
         import_line = import_line.rstrip() + '\n'
@@ -1344,28 +1355,24 @@ class Patcher:
             if content:
                 SHARP = '#'
                 TDQ = '"""'
+                UTDQ = 'u"""'
                 TSQ = "'''"
-                l = ''
-                start = 0
-                end = len(content)
-                pos = start
+                UTSQ = "u'''"
 
+                line = ''
+                end = len(content)
+                pos = 0
                 while pos < end:
                     line = get_line(content, pos)
-                    l = line.strip()
-                    comment = l.startswith(SHARP)
-                    if l.startswith(TDQ):
-                        comment |= True
-                        start = self.find_end_comment(TDQ, line, content, pos)
-                        if start >= 0:
-                            pos = start
-                            line = get_line(content, start)
-                    elif l.startswith(TSQ):
-                        comment |= True
-                        start = self.find_end_comment(TSQ, line, content, pos)
-                        if start >= 0:
-                            pos = start
-                            line = get_line(content, start)
+                    comment = line.lstrip().startswith(SHARP)
+                    if not comment:
+                        comment, pos, line = self.comment_handler(TDQ, comment, line, content, pos)
+                    if not comment:
+                        comment, pos, line = self.comment_handler(UTDQ, comment, line, content, pos)
+                    if not comment:
+                        comment, pos, line = self.comment_handler(TSQ, comment, line, content, pos)
+                    if not comment:
+                        comment, pos, line = self.comment_handler(UTSQ, comment, line, content, pos)
 
                     if not comment:
                         break
@@ -1377,7 +1384,7 @@ class Patcher:
                     content = content[pos:]
 
                     if content:
-                        if l:
+                        if line.strip():
                             return prev_content + import_line + '\n\n' + content
                         else:
                             return prev_content + import_line + '\n' + content
