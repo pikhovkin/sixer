@@ -1142,6 +1142,28 @@ class AbsoluteImport(Operation):
         pass
 
 
+class Division(Operation):
+    NAME = "division"
+    DOC = ('insert "from __future__ import division"')
+
+    def patch(self, content):
+        return self.patcher.add_import(content, 'from __future__ import division')
+
+    def check(self, content):
+        pass
+
+
+class UnicodeLiterals(Operation):
+    NAME = "unicode_literals"
+    DOC = ('insert "from __future__ import unicode_literals"')
+
+    def patch(self, content):
+        return self.patcher.add_import(content, 'from __future__ import unicode_literals')
+
+    def check(self, content):
+        pass
+
+
 class String(Operation):
     NAME = "string"
     DOC = 'replace string.func(str, ...) with text.func(...)'
@@ -1258,6 +1280,8 @@ OPERATIONS = (
     Print,
     PrintFunction,
     AbsoluteImport,
+    Division,
+    UnicodeLiterals,
     String,
     All,
 )
@@ -1291,6 +1315,8 @@ class Patcher:
             operations.discard(All.NAME)
             operations.discard(PrintFunction.NAME)
             operations.discard(AbsoluteImport.NAME)
+            operations.discard(Division.NAME)
+            operations.discard(UnicodeLiterals.NAME)
         discard = [operation for operation in operations
                    if operation.startswith('-')]
         for name in discard:

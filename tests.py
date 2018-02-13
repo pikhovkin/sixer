@@ -1332,530 +1332,334 @@ class TestOperations(unittest.TestCase):
             x = string.ascii_letters
             """)
 
+    def _check_future_insertion(self, operation):
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+            from __future__ import {}
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+            from __future__ import {}
+        '''.format(operation), '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+            from __future__ import {}
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+            from __future__ import {}
+        '''.format(operation), '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+            from __future__ import {}
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+
+            from __future__ import {}
+        '''.format(operation), '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+
+            from __future__ import {}
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+            """
+                Comments
+            """
+            """
+                Comments """
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+            """
+                Comments
+            """
+            """
+                Comments """
+            from __future__ import {}
+
+
+            def func():
+                pass
+
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            """
+            """
+            """"""
+            """
+                Comments
+            """
+            """
+                Comments """
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            from __future__ import {}
+
+
+            """
+            """
+            """"""
+            """
+                Comments
+            """
+            """
+                Comments """
+            def func():
+                pass
+
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            \'\'\'
+            \'\'\'
+            """"""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            \'\'\'
+            \'\'\'
+            """"""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            from __future__ import {}
+
+
+            def func():
+                pass
+
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+
+            \'\'\'
+            \'\'\'
+            """"""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            from __future__ import {}
+
+
+            \'\'\'
+            \'\'\'
+            """"""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            def func():
+                pass
+
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+
+            from random import random
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+
+            from __future__ import {}
+
+            from random import random
+
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+
+            from __future__ import zzz
+
+            from random import random
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+
+            from __future__ import {}
+            from __future__ import zzz
+
+            from random import random
+
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+
+            from __future__ import aaa
+            from __future__ import zzz
+
+            from random import random
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            """
+            """
+            """"""
+
+
+            from __future__ import aaa
+            from __future__ import {}
+            from __future__ import zzz
+
+            from random import random
+
+        '''.format(operation))
+
+        self.check(operation, '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            u\'\'\'
+            \'\'\'
+            u""""""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            def func():
+                pass
+
+        ''', '''
+            #!/usr/bin/env python3
+            # coding: utf-8
+            u\'\'\'
+            \'\'\'
+            u""""""
+            \'\'\'
+                Comments
+            \'\'\'
+            """
+                Comments """
+            from __future__ import {}
+
+
+            def func():
+                pass
+
+        '''.format(operation))
+
     def test_print_function(self):
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-            from __future__ import print_function
-        ''')
-
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-            """
-                Comments
-            """
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-            """
-                Comments
-            """
-            """
-                Comments """
-            from __future__ import print_function
-
-
-            def func():
-                pass
-
-        ''')
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-
-            """
-            """
-            """"""
-            """
-                Comments
-            """
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            from __future__ import print_function
-
-
-            """
-            """
-            """"""
-            """
-                Comments
-            """
-            """
-                Comments """
-            def func():
-                pass
-
-        ''')
-
-
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            \'\'\'
-            \'\'\'
-            """"""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            \'\'\'
-            \'\'\'
-            """"""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            from __future__ import print_function
-
-
-            def func():
-                pass
-
-        ''')
-
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-
-            \'\'\'
-            \'\'\'
-            """"""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            from __future__ import print_function
-
-
-            \'\'\'
-            \'\'\'
-            """"""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            def func():
-                pass
-
-        ''')
-
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from random import random
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import print_function
-
-            from random import random
-
-        ''')
-
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import division
-
-            from random import random
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import division
-            from __future__ import print_function
-
-            from random import random
-
-        ''')
-
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import absolute_import
-            from __future__ import division
-
-            from random import random
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import absolute_import
-            from __future__ import division
-            from __future__ import print_function
-
-            from random import random
-
-        ''')
-
-        self.check("print_function", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            u\'\'\'
-            \'\'\'
-            u""""""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            u\'\'\'
-            \'\'\'
-            u""""""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            from __future__ import print_function
-
-
-            def func():
-                pass
-
-        ''')
+        self._check_future_insertion('print_function')
 
     def test_absolute_import(self):
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-            from __future__ import absolute_import
-        ''')
+        self._check_future_insertion('absolute_import')
 
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-            """
-                Comments
-            """
-            """
-                Comments """
-            def func():
-                pass
+    def test_division(self):
+        self._check_future_insertion('division')
 
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-            """
-                Comments
-            """
-            """
-                Comments """
-            from __future__ import absolute_import
-
-
-            def func():
-                pass
-
-        ''')
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-
-            """
-            """
-            """"""
-            """
-                Comments
-            """
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            from __future__ import absolute_import
-
-
-            """
-            """
-            """"""
-            """
-                Comments
-            """
-            """
-                Comments """
-            def func():
-                pass
-
-        ''')
-
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            \'\'\'
-            \'\'\'
-            """"""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            \'\'\'
-            \'\'\'
-            """"""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            from __future__ import absolute_import
-
-
-            def func():
-                pass
-
-        ''')
-
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-
-            \'\'\'
-            \'\'\'
-            """"""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            from __future__ import absolute_import
-
-
-            \'\'\'
-            \'\'\'
-            """"""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            def func():
-                pass
-
-        ''')
-
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from random import random
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import absolute_import
-
-            from random import random
-
-        ''')
-
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import division
-
-            from random import random
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import absolute_import
-            from __future__ import division
-
-            from random import random
-
-        ''')
-
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import division
-            from __future__ import print_function
-
-            from random import random
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            """
-            """
-            """"""
-
-
-            from __future__ import absolute_import
-            from __future__ import division
-            from __future__ import print_function
-
-            from random import random
-
-        ''')
-
-        self.check("absolute_import", '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            u\'\'\'
-            \'\'\'
-            u""""""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            def func():
-                pass
-
-        ''', '''
-            #!/usr/bin/env python3
-            # coding: utf-8
-            u\'\'\'
-            \'\'\'
-            u""""""
-            \'\'\'
-                Comments
-            \'\'\'
-            """
-                Comments """
-            from __future__ import absolute_import
-
-
-            def func():
-                pass
-
-        ''')
+    def test_unicode_literals(self):
+        self._check_future_insertion('unicode_literals')
 
     def test_insert_future_group(self):
         self.check("absolute_import", '''
